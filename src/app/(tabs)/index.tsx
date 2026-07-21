@@ -1,5 +1,5 @@
 import { colors, globalStyles } from '@/constants/global';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing } from '@/components/ProgressRing';
 import { TimerControls } from '@/components/TimerControls';
@@ -23,7 +23,9 @@ export default function TimerScreen() {
     startTimeRef.current = Date.now() - elapsedTime;
 
     intervalRef.current = setInterval(() => {
-      setElapsedTime(Date.now() - startTimeRef.current);
+      const currentMs = Date.now() - startTimeRef.current;
+
+      setElapsedTime(currentMs);
     }, 10);
   };
 
@@ -35,9 +37,9 @@ export default function TimerScreen() {
   const resetTimer = () => {
     clearInterval(intervalRef.current);
     setRunning(false);
-    setGreenCardMs(240000);
-    setYellowCardMs(300000);
-    setRedCardMs(360000);
+    setGreenCardMs(5 * 1000);
+    setYellowCardMs(8 * 1000);
+    setRedCardMs(10 * 1000);
     setElapsedTime(0);
   };
 
@@ -47,7 +49,7 @@ export default function TimerScreen() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={globalStyles.container}>
+      <SafeAreaView style={styles.contentArea}>
         <ProgressRing
           current_value={elapsedTime}
           max_value={totalTime}
@@ -60,11 +62,18 @@ export default function TimerScreen() {
           onReset={resetTimer}
           onLog={logSpeaker}
         />
-
-        <TouchableOpacity onPress={() => startTimer}>
-          <Text>Test</Text>
-        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  contentArea: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingTop: 128,
+    gap: 32,
+    backgroundColor: colors.background,
+  },
+});

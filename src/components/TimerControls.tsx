@@ -29,7 +29,7 @@ export function TimerControls({
             <Ionicons name='play' color={colors.primary} size={50} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onLog()}>
-            <Feather name='user-check' color={colors.red} size={50} />
+            <Feather name='user-check' color={colors.primary} size={50} />
           </TouchableOpacity>
         </>
       ) : (
@@ -46,7 +46,6 @@ export function TimerControls({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

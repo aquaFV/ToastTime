@@ -33,7 +33,7 @@ export default function RootLayout() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name='index' />
+      <Stack.Screen name='(tabs)' />
     </Stack>
   );
 }
