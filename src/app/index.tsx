@@ -6,11 +6,11 @@ import { TimerControls } from '@/components/TimerControls';
 import { useState, useRef } from 'react';
 
 export default function TimerScreen() {
-  const [greenCardMs, setGreenCardMs] = useState(240000);
-  const [yellowCardMs, setYellowCardMs] = useState(300000);
-  const [redCardMs, setRedCardMs] = useState(360000);
+  const [greenCardMs, setGreenCardMs] = useState(5000);
+  const [yellowCardMs, setYellowCardMs] = useState(8000);
+  const [redCardMs, setRedCardMs] = useState(10000);
 
-  const totalTime = greenCardMs + yellowCardMs + redCardMs;
+  const totalTime = redCardMs;
 
   const [elapsedTime, setElapsedTime] = useState(0);
   const [running, setRunning] = useState(false);
@@ -60,6 +60,10 @@ export default function TimerScreen() {
           onReset={resetTimer}
           onLog={logSpeaker}
         />
+
+        <TouchableOpacity onPress={() => startTimer}>
+          <Text>Test</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </SafeAreaProvider>
   );

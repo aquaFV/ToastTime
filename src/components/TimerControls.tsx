@@ -22,19 +22,19 @@ export function TimerControls({
     <View style={styles.container}>
       {!running ? (
         <>
-          <TouchableOpacity onPress={() => onReset}>
+          <TouchableOpacity onPress={() => onReset()}>
             <Ionicons name='refresh' color={colors.primary} size={50} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onStart}>
+          <TouchableOpacity onPress={() => onStart()}>
             <Ionicons name='play' color={colors.primary} size={50} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onLog}>
-            <Feather name='user-check' color={colors.primary} size={50} />
+          <TouchableOpacity onPress={() => onLog()}>
+            <Feather name='user-check' color={colors.red} size={50} />
           </TouchableOpacity>
         </>
       ) : (
         <>
-          <TouchableOpacity onPress={() => onPause}>
+          <TouchableOpacity onPress={() => onPause()}>
             <Ionicons name='pause' color={colors.primary} size={50} />
           </TouchableOpacity>
         </>
