@@ -43,6 +43,7 @@ export default function TimerScreen() {
 
   const logSpeaker = () => {
     console.log('Logging speaker...');
+    // Poo
   };
 
   return (
