@@ -26,7 +26,7 @@ export default function TimerScreen() {
       const currentMs = Date.now() - startTimeRef.current;
 
       setElapsedTime(currentMs);
-    }, 10);
+    }, 100);
   };
 
   const pauseTimer = () => {
