@@ -4,8 +4,11 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing } from '@/components/ProgressRing';
 import { TimerControls } from '@/components/TimerControls';
 import { useState, useRef } from 'react';
+import { TimerSetup } from '@/components/TimerSetup';
 
 export default function TimerScreen() {
+  const [speakerName, setSpeakerName] = useState('');
+
   const [greenCardMs, setGreenCardMs] = useState(5000);
   const [yellowCardMs, setYellowCardMs] = useState(8000);
   const [redCardMs, setRedCardMs] = useState(10000);
@@ -55,12 +58,23 @@ export default function TimerScreen() {
           max_value={totalTime}
           current_color={colors.primary}
         />
-        <TimerControls
+        {/* <TimerControls
           running={running}
           onStart={startTimer}
           onPause={pauseTimer}
           onReset={resetTimer}
           onLog={logSpeaker}
+        /> */}
+        <TimerSetup
+          speakerName={speakerName}
+          setSpeakerName={() => setSpeakerName}
+          greenTime={greenCardMs}
+          setGreenTime={() => setGreenCardMs}
+          yellowTime={yellowCardMs}
+          setYellowTime={() => setYellowCardMs}
+          redTime={redCardMs}
+          setRedTime={() => setRedCardMs}
+          onStart={() => console.log('Starting...')}
         />
       </SafeAreaView>
     </SafeAreaProvider>

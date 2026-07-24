@@ -45,9 +45,58 @@ export function TimerSetup({
         value={speakerName}
         onChangeText={setSpeakerName}
       />
-      <TextInput placeholder="Uhh... Dropdown! DON'T TOUCH." />
-      // End of session note: // Add the logic for showing the right stuff,
-      check the image if you don't understand. // Good Luck.
+      <TextInput
+        placeholder="Uhh... Dropdown! DON'T TOUCH."
+        placeholderTextColor={colors.textLightSecondary}
+      />
+      <View style={styles.timeInputsContainer}>
+        <View style={styles.timeInputs}>
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+        </View>
+        <View style={styles.timeInputs}>
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+          <TextInput
+            placeholder=''
+            placeholderTextColor={colors.textLightSecondary}
+            // Figure out how to calculate the time... ig?
+            style={styles.textInput}
+            keyboardType='numeric'
+          />
+        </View>
+      </View>
     </View>
   );
 }
@@ -61,11 +110,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
   },
+  timeInputsContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
   timeInputs: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    gap: 8,
+    gap: 16,
   },
   textInput: {
     backgroundColor: colors.surfaceDark,
