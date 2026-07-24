@@ -44,3 +44,8 @@ export const SPEECH_PRESETS: SpeechPreset[] = [
     hasGracePeriod: false,
   },
 ];
+
+export const PRESET_DROPDOWN_DATA = SPEECH_PRESETS.map((preset) => ({
+  label: preset.title,
+  value: preset.id,
+}));
