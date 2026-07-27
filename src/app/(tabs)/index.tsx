@@ -1,6 +1,5 @@
-import { colors, globalStyles } from '@/constants/global';
+import { colors } from '@/constants/global';
 import {
-  StatusBar,
   StyleSheet,
   View,
   TextInput,
@@ -11,70 +10,44 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing } from '@/components/ProgressRing';
 import { TimerControls } from '@/components/TimerControls';
 import { useState, useRef } from 'react';
-import { TimerSetup } from '@/components/TimerSetup';
-import { SpeechPreset } from '@/types/presets';
 import { PRESET_DROPDOWN_DATA, SPEECH_PRESETS } from '@/constants/presets';
 import { Dropdown } from 'react-native-element-dropdown';
 import { fontFamily } from '@/dimensions/fontFamily';
+import useTimer from '@/hooks/useTimer';
+import { useKeepAwake } from 'expo-keep-awake';
+import * as Haptics from 'expo-haptics';
 
 export default function TimerScreen() {
-  const [speakerName, setSpeakerName] = useState('');
+  // Keeps phone awake
+  useKeepAwake();
 
-  const [greenSignalMs, setGreenSignalMs] = useState(5000);
-  const [yellowSignalMs, setYellowSignalMs] = useState(8000);
-  const [redSignalMs, setRedSignalMs] = useState(10000);
-
-  const totalTime = redSignalMs;
-
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-
-  const startTimeRef = useRef(0);
-  const intervalRef = useRef(0);
-
-  const startTimer = () => {
-    setHasStarted(true);
-    setRunning(true);
-    startTimeRef.current = Date.now() - elapsedTime;
-
-    intervalRef.current = setInterval(() => {
-      const currentMs = Date.now() - startTimeRef.current;
-
-      setElapsedTime(currentMs);
-    }, 100);
-  };
-
-  const pauseTimer = () => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-  };
-
-  const resetTimer = () => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    setHasStarted(false);
-    setElapsedTime(0);
-  };
-
-  const logSpeaker = () => {
-    console.log(
-      `Logging Speaker: ${speakerName} with a speech time of: ${Math.floor(elapsedTime / 1000 / 60)}:${Math.floor(elapsedTime / 1000) % 60}`
-    );
-    resetTimer();
-  };
-
+  // Timer setup variables
   const [selectedPresetId, setSelectedPresetId] = useState('icebreaker');
+  const [speakerName, setSpeakerName] = useState('');
+  const nameEntered = !speakerName.trim();
 
-  const handlePresetChange = (item: { label: string; value: string }) => {
+  // Timer
+  const {
+    elapsedTime,
+    running,
+    hasStartedRef,
+    progressValue,
+    maxProgressValue,
+    currentProgressColor,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    logSpeaker,
+    setPreset,
+  } = useTimer({ speakerName, selectedPresetId });
+
+  const onPresetChange = (item: { label: string; value: string }) => {
     setSelectedPresetId(item.value);
 
     const preset = SPEECH_PRESETS.find((p) => p.id === item.value);
 
     if (preset) {
-      setGreenSignalMs(preset.greenMs);
-      setYellowSignalMs(preset.yellowMs);
-      setRedSignalMs(preset.redMs);
+      setPreset(preset.greenMs, preset.yellowMs, preset.redMs);
     }
   };
 
@@ -82,14 +55,17 @@ export default function TimerScreen() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.contentArea}>
         <ProgressRing
-          current_value={elapsedTime}
-          max_value={totalTime}
-          current_color={colors.primary}
+          currentValue={progressValue}
+          maxValue={maxProgressValue}
+          currentColor={currentProgressColor}
+          elapsedTime={elapsedTime}
         />
-        {hasStarted ? (
+
+        {hasStartedRef.current ? (
           <TimerControls
             running={running}
             onStart={startTimer}
+            onResume={startTimer}
             onPause={pauseTimer}
             onReset={resetTimer}
             onLog={logSpeaker}
@@ -110,7 +86,7 @@ export default function TimerScreen() {
                 labelField='label'
                 valueField='value'
                 value={selectedPresetId}
-                onChange={handlePresetChange}
+                onChange={onPresetChange}
                 style={styles.textInput}
                 containerStyle={styles.listContainer}
                 itemTextStyle={styles.listItemStyle}
@@ -118,10 +94,21 @@ export default function TimerScreen() {
                 activeColor='#4d4d4d'
               />
               <TouchableOpacity
-                style={styles.startBtn}
+                style={[
+                  styles.startBtn,
+                  nameEntered && { backgroundColor: '#999894' },
+                ]}
                 onPress={() => startTimer()}
+                disabled={nameEntered}
               >
-                <Text style={styles.startBtnText}>Start</Text>
+                <Text
+                  style={[
+                    styles.startBtnText,
+                    nameEntered && { color: '#2e2e2e' },
+                  ]}
+                >
+                  Start
+                </Text>
               </TouchableOpacity>
             </View>
           </>
@@ -136,7 +123,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    paddingTop: 128,
+    paddingTop: 32,
     gap: 32,
     backgroundColor: colors.background,
   },
@@ -166,6 +153,7 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 20,
   },
   startBtnText: {
     color: colors.textDark,

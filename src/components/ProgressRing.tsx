@@ -4,15 +4,17 @@ import { StyleSheet, View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 type ProgressRingProps = {
-  current_value: number;
-  max_value: number;
-  current_color: string;
+  currentValue: number;
+  maxValue: number;
+  currentColor: string;
+  elapsedTime: number;
 };
 
 export function ProgressRing({
-  current_value,
-  max_value,
-  current_color,
+  currentValue: current_value,
+  maxValue: max_value,
+  currentColor: current_color,
+  elapsedTime,
 }: ProgressRingProps) {
   const progressRatio = current_value / max_value;
   const radius = 135;
@@ -21,10 +23,10 @@ export function ProgressRing({
     circumference - Math.min(progressRatio, 1) * circumference;
   const strokeWidth = 21.5;
 
-  const minutes = Math.floor(current_value / 1000 / 60)
+  const minutes = Math.floor(elapsedTime / 1000 / 60)
     .toString()
     .padStart(2, '0');
-  const seconds = (Math.floor(current_value / 1000) % 60)
+  const seconds = (Math.floor(elapsedTime / 1000) % 60)
     .toString()
     .padStart(2, '0');
 

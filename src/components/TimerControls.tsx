@@ -6,6 +6,7 @@ import Feather from '@expo/vector-icons/Feather';
 type TimerControlsProps = {
   running: boolean;
   onStart: () => void;
+  onResume: () => void;
   onPause: () => void;
   onReset: () => void;
   onLog: () => void;
@@ -35,7 +36,7 @@ export function TimerControls({
       ) : (
         <>
           <TouchableOpacity onPress={() => onPause()}>
-            <Ionicons name='pause' color={colors.primary} size={50} />
+            <Ionicons name='pause' color={colors.primary} size={64} />
           </TouchableOpacity>
         </>
       )}
