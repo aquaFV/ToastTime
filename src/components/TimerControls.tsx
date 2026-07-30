@@ -8,7 +8,7 @@ type TimerControlsProps = {
   onStart: () => void;
   onResume: () => void;
   onPause: () => void;
-  onReset: () => void;
+  onReset: (value: boolean) => void;
   onLog: () => void;
 };
 
@@ -23,7 +23,7 @@ export function TimerControls({
     <View style={styles.container}>
       {!running ? (
         <>
-          <TouchableOpacity onPress={() => onReset()}>
+          <TouchableOpacity onPress={() => onReset(true)}>
             <Ionicons name='refresh' color={colors.primary} size={50} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onStart()}>

@@ -1,10 +1,12 @@
-import { colors } from '@/constants/global';
+import { colors, globalStyles } from '@/constants/global';
 import {
   StyleSheet,
   View,
   TextInput,
   TouchableOpacity,
   Text,
+  Modal,
+  Animated,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing } from '@/components/ProgressRing';
@@ -18,6 +20,9 @@ import { useKeepAwake } from 'expo-keep-awake';
 import * as Haptics from 'expo-haptics';
 
 export default function TimerScreen() {
+  // Alert modal
+  const [alertDialog, setAlertDialog] = useState(false);
+
   // Keeps phone awake
   useKeepAwake();
 
@@ -54,6 +59,52 @@ export default function TimerScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.contentArea}>
+        <Modal
+          visible={alertDialog}
+          transparent={true}
+          animationType='slide'
+          onRequestClose={() => setAlertDialog(false)}
+        >
+          <View style={globalStyles.alertPopupContainer}>
+            <View style={globalStyles.alertPopup}>
+              <Text style={globalStyles.alertPopupTitle}>Reset Timer</Text>
+              <Text style={globalStyles.alertPopupMsg}>
+                Are you sure you want to reset the timer?
+              </Text>
+              <View style={globalStyles.alertPopupBtnContainer}>
+                <TouchableOpacity
+                  style={[
+                    globalStyles.alertPopupBtn,
+                    globalStyles.alertPopupBtnDistructive,
+                  ]}
+                  onPress={() => {
+                    setAlertDialog(false);
+                    resetTimer();
+                  }}
+                >
+                  <Text
+                    style={[
+                      globalStyles.alertPopupBtnText,
+                      { color: colors.red },
+                    ]}
+                  >
+                    Yes
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    globalStyles.alertPopupBtn,
+                    globalStyles.alertPopupBtnDefault,
+                  ]}
+                  onPress={() => setAlertDialog(false)}
+                >
+                  <Text style={globalStyles.alertPopupBtnText}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         <ProgressRing
           currentValue={progressValue}
           maxValue={maxProgressValue}
@@ -67,7 +118,7 @@ export default function TimerScreen() {
             onStart={startTimer}
             onResume={startTimer}
             onPause={pauseTimer}
-            onReset={resetTimer}
+            onReset={setAlertDialog}
             onLog={logSpeaker}
           />
         ) : (
