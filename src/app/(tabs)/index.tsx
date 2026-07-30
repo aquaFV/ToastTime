@@ -20,11 +20,33 @@ import { useKeepAwake } from 'expo-keep-awake';
 import * as Haptics from 'expo-haptics';
 
 export default function TimerScreen() {
+  // Keeps phone awake
+  useKeepAwake();
+
   // Alert modal
   const [alertDialog, setAlertDialog] = useState(false);
 
-  // Keeps phone awake
-  useKeepAwake();
+  // Pulse animation
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  const startPulseAnim = () => {
+    pulseAnim.setValue(0);
+
+    const signalPulse = Animated.sequence([
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]);
+
+    Animated.loop(signalPulse, { iterations: 4 }).start();
+  };
 
   // Timer setup variables
   const [selectedPresetId, setSelectedPresetId] = useState('icebreaker');
@@ -44,7 +66,7 @@ export default function TimerScreen() {
     resetTimer,
     logSpeaker,
     setPreset,
-  } = useTimer({ speakerName, selectedPresetId });
+  } = useTimer({ speakerName, selectedPresetId, startPulseAnim });
 
   const onPresetChange = (item: { label: string; value: string }) => {
     setSelectedPresetId(item.value);
@@ -164,6 +186,17 @@ export default function TimerScreen() {
             </View>
           </>
         )}
+
+        <Animated.View
+          pointerEvents='none'
+          style={[
+            globalStyles.pulseView,
+            {
+              backgroundColor: currentProgressColor,
+              opacity: pulseAnim,
+            },
+          ]}
+        />
       </SafeAreaView>
     </SafeAreaProvider>
   );

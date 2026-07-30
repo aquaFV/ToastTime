@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 type UseTimerOptions = {
   speakerName: string;
   selectedPresetId: string;
+  startPulseAnim: () => void;
 };
 
 type UseTimerReturn = {
@@ -28,6 +29,7 @@ type UseTimerReturn = {
 export default function useTimer({
   speakerName,
   selectedPresetId,
+  startPulseAnim,
 }: UseTimerOptions): UseTimerReturn {
   const [greenSignalMs, setGreenSignalMs] = useState(5000);
   const [yellowSignalMs, setYellowSignalMs] = useState(8000);
@@ -74,16 +76,13 @@ export default function useTimer({
       // This if statement will run only once. This avoids unnecessary calls to the 'onMaxTime' function.
       // The same if statement is also ran in the 'resumeTimer' function.
       if (currentMs >= redSignalMs && !redSignalReachedRef.current) {
-        redSignalReachedRef.current = true;
         onRedSignal();
       } else if (
         currentMs >= yellowSignalMs &&
         !yellowSignalReachedRef.current
       ) {
-        yellowSignalReachedRef.current = true;
         onYellowSignal();
       } else if (currentMs >= greenSignalMs && !greenSignalReachedRef.current) {
-        greenSignalReachedRef.current = true;
         onGreenSignal();
       }
     }, 100);
@@ -99,6 +98,8 @@ export default function useTimer({
     clearInterval(intervalRef.current);
     setRunning(false);
     setElapsedTime(0);
+    greenSignalReachedRef.current = false;
+    yellowSignalReachedRef.current = false;
     redSignalReachedRef.current = false;
     hasStartedRef.current = false;
 
@@ -123,16 +124,25 @@ export default function useTimer({
   };
 
   const onGreenSignal = () => {
+    greenSignalReachedRef.current = true;
+    startPulseAnim();
+
     setCurrentProgressColor(colors.green);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   };
 
   const onYellowSignal = () => {
+    yellowSignalReachedRef.current = true;
+    startPulseAnim();
+
     setCurrentProgressColor(colors.yellow);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   };
 
   const onRedSignal = () => {
+    redSignalReachedRef.current = true;
+    startPulseAnim();
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     setCurrentProgressColor(colors.red); // Simply indicates that the grace period has started.
 
