@@ -8,16 +8,19 @@ import {
 } from 'react-native';
 import { colors, globalStyles } from '@/constants/global';
 import { useState, useRef } from 'react';
+import { WheelPicker } from '@/components/WheelPicker';
+import { ScrollView } from 'react-native';
 
 export default function ModalTest() {
   const [popupModal, setPopupModal] = useState(false);
-  const [isPulsing, setIsPulsing] = useState(false);
   const [currentColor, setCurrentColor] = useState(colors.green);
+
+  const [mins, setMins] = useState(0);
+  const [secs, setSecs] = useState(0);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const startPulseAnim = () => {
-    setIsPulsing(true);
     fadeAnim.setValue(0);
 
     const signalPulse = Animated.sequence([
@@ -33,11 +36,7 @@ export default function ModalTest() {
       }),
     ]);
 
-    Animated.loop(signalPulse, { iterations: 4 }).start(({ finished }) => {
-      if (finished) {
-        setIsPulsing(false);
-      }
-    });
+    Animated.loop(signalPulse, { iterations: 4 }).start();
   };
 
   return (
@@ -53,6 +52,11 @@ export default function ModalTest() {
         <View style={styles.modalContainer}>
           <View style={styles.modal}>
             <Text style={{ color: '#000000' }}>This is a modal</Text>
+            <WheelPicker
+              setSelectedMins={setMins}
+              setSelectedSecs={setSecs}
+              color={colors.green}
+            />
             <TouchableOpacity
               onPress={() => setPopupModal(false)}
               style={styles.button}
