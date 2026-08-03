@@ -43,6 +43,13 @@ export const SPEECH_PRESETS: SpeechPreset[] = [
     redMs: minToMs(3),
     hasGracePeriod: false,
   },
+  {
+    id: 'custom_time',
+    title: 'Custom',
+    greenMs: minToMs(5),
+    yellowMs: minToMs(6),
+    redMs: minToMs(7),
+  },
 ];
 
 export const PRESET_DROPDOWN_DATA = SPEECH_PRESETS.map((preset) => ({

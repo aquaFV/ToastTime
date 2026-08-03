@@ -52,6 +52,7 @@ export default function TimerScreen() {
   const [selectedPresetId, setSelectedPresetId] = useState('icebreaker');
   const [speakerName, setSpeakerName] = useState('');
   const nameEntered = !speakerName.trim();
+  const [isCustomTime, setIsCustomTime] = useState(false);
 
   // Timer
   const {
@@ -73,7 +74,10 @@ export default function TimerScreen() {
 
     const preset = SPEECH_PRESETS.find((p) => p.id === item.value);
 
-    if (preset) {
+    if (preset && preset.id === 'custom_time') {
+      setIsCustomTime(true);
+    } else if (preset) {
+      setIsCustomTime(false);
       setPreset(preset.greenMs, preset.yellowMs, preset.redMs);
     }
   };
@@ -127,12 +131,12 @@ export default function TimerScreen() {
           </View>
         </Modal>
 
-        <ProgressRing
+        {/* <ProgressRing
           currentValue={progressValue}
           maxValue={maxProgressValue}
           currentColor={currentProgressColor}
           elapsedTime={elapsedTime}
-        />
+        /> */}
 
         {hasStartedRef.current ? (
           <TimerControls
@@ -166,6 +170,14 @@ export default function TimerScreen() {
                 selectedTextStyle={styles.listItemStyle}
                 activeColor='#4d4d4d'
               />
+              {isCustomTime && (
+                <TouchableOpacity
+                  style={styles.startBtn}
+                  onPress={() => console.log('Hey! Hi!')}
+                >
+                  <Text style={styles.startBtnText}>Enter</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={[
                   styles.startBtn,

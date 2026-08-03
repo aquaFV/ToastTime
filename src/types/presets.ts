@@ -4,5 +4,5 @@ export type SpeechPreset = {
   greenMs: number;
   yellowMs: number;
   redMs: number;
-  hasGracePeriod: boolean;
+  hasGracePeriod?: boolean;
 };
