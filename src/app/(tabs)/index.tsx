@@ -7,6 +7,7 @@ import {
   Text,
   Modal,
   Animated,
+  Pressable,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing } from '@/components/ProgressRing';
@@ -17,14 +18,16 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { fontFamily } from '@/dimensions/fontFamily';
 import useTimer from '@/hooks/useTimer';
 import { useKeepAwake } from 'expo-keep-awake';
-import * as Haptics from 'expo-haptics';
+import { SignalWheels } from '@/components/SignalWheelPickers';
+import { custom_preset } from '@/types/presets';
+import { Checkbox } from 'expo-checkbox';
 
 export default function TimerScreen() {
   // Keeps phone awake
-  useKeepAwake();
+  // useKeepAwake();
 
   // Alert modal
-  const [alertDialog, setAlertDialog] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   // Pulse animation
   const pulseAnim = useRef(new Animated.Value(0)).current;
@@ -53,6 +56,35 @@ export default function TimerScreen() {
   const [speakerName, setSpeakerName] = useState('');
   const nameEntered = !speakerName.trim();
   const [isCustomTime, setIsCustomTime] = useState(false);
+  const [c_hasGracePeriod, setC_HasGracePeriod] = useState(true);
+
+  const initializeTimer = (item: { label: string; value: string }) => {
+    setSelectedPresetId(item.value);
+
+    const preset = SPEECH_PRESETS.find((p) => p.id === item.value);
+
+    if (preset && preset.id !== 'custom_time') {
+      console.log(
+        `Not custom.\nGreen: ${preset.greenMs}\nYellow: ${preset.yellowMs}\nRed: ${preset.redMs}`
+      );
+      setPreset(preset.greenMs, preset.yellowMs, preset.redMs);
+    }
+  };
+
+  const onCustomTimerOK = () => {
+    setIsCustomTime(false);
+    const customPreset = custom_preset({
+      greenMs: greenSignal,
+      yellowMs: yellowSignal,
+      redMs: redSignal,
+    });
+    const now: Date = new Date();
+    console.log(
+      `Custom (${now.toLocaleTimeString()}).\nGreen: ${customPreset.greenMs}\nYellow: ${customPreset.yellowMs}\nRed: ${customPreset.redMs}`
+    );
+
+    setPreset(customPreset.greenMs, customPreset.yellowMs, customPreset.redMs);
+  };
 
   // Timer
   const {
@@ -62,34 +94,32 @@ export default function TimerScreen() {
     progressValue,
     maxProgressValue,
     currentProgressColor,
+    greenSignal,
+    setGreenSignal,
+    yellowSignal,
+    setYellowSignal,
+    redSignal,
+    setRedSignal,
     startTimer,
     pauseTimer,
     resetTimer,
     logSpeaker,
     setPreset,
-  } = useTimer({ speakerName, selectedPresetId, startPulseAnim });
-
-  const onPresetChange = (item: { label: string; value: string }) => {
-    setSelectedPresetId(item.value);
-
-    const preset = SPEECH_PRESETS.find((p) => p.id === item.value);
-
-    if (preset && preset.id === 'custom_time') {
-      setIsCustomTime(true);
-    } else if (preset) {
-      setIsCustomTime(false);
-      setPreset(preset.greenMs, preset.yellowMs, preset.redMs);
-    }
-  };
+  } = useTimer({
+    speakerName,
+    selectedPresetId,
+    startPulseAnim,
+  });
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.contentArea}>
+        {/* Popup dialog warning the user when restarting the timer */}
         <Modal
-          visible={alertDialog}
+          visible={resetting}
           transparent={true}
           animationType='slide'
-          onRequestClose={() => setAlertDialog(false)}
+          onRequestClose={() => setResetting(false)}
         >
           <View style={globalStyles.alertPopupContainer}>
             <View style={globalStyles.alertPopup}>
@@ -104,7 +134,7 @@ export default function TimerScreen() {
                     globalStyles.alertPopupBtnDistructive,
                   ]}
                   onPress={() => {
-                    setAlertDialog(false);
+                    setResetting(false);
                     resetTimer();
                   }}
                 >
@@ -122,7 +152,7 @@ export default function TimerScreen() {
                     globalStyles.alertPopupBtn,
                     globalStyles.alertPopupBtnDefault,
                   ]}
-                  onPress={() => setAlertDialog(false)}
+                  onPress={() => setResetting(false)}
                 >
                   <Text style={globalStyles.alertPopupBtnText}>No</Text>
                 </TouchableOpacity>
@@ -131,12 +161,64 @@ export default function TimerScreen() {
           </View>
         </Modal>
 
-        {/* <ProgressRing
+        {/* Popup dialog for setting custom signal times */}
+        <Modal
+          visible={isCustomTime}
+          transparent={true}
+          animationType='slide'
+          onRequestClose={() => setIsCustomTime(false)}
+        >
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <View style={styles.customTimeModal}>
+              <SignalWheels
+                setGreenSignal={setGreenSignal}
+                setYellowSignal={setYellowSignal}
+                setRedSignal={setRedSignal}
+              />
+              <Pressable
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginVertical: 10,
+                }}
+                onPress={() => setC_HasGracePeriod(!c_hasGracePeriod)}
+              >
+                <Checkbox
+                  style={{ marginRight: 10 }}
+                  value={c_hasGracePeriod}
+                  onValueChange={setC_HasGracePeriod}
+                  color={c_hasGracePeriod ? 'red' : 'blue'}
+                />
+                <Text style={styles.customTimeText}>Has grace period</Text>
+              </Pressable>
+              <TouchableOpacity
+                style={styles.startBtn}
+                onPress={() => onCustomTimerOK()}
+              >
+                <Text style={styles.startBtnText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <ProgressRing
           currentValue={progressValue}
           maxValue={maxProgressValue}
           currentColor={currentProgressColor}
           elapsedTime={elapsedTime}
-        /> */}
+        />
 
         {hasStartedRef.current ? (
           <TimerControls
@@ -144,7 +226,7 @@ export default function TimerScreen() {
             onStart={startTimer}
             onResume={startTimer}
             onPause={pauseTimer}
-            onReset={setAlertDialog}
+            onReset={setResetting}
             onLog={logSpeaker}
           />
         ) : (
@@ -163,17 +245,17 @@ export default function TimerScreen() {
                 labelField='label'
                 valueField='value'
                 value={selectedPresetId}
-                onChange={onPresetChange}
+                onChange={(item) => initializeTimer(item)}
                 style={styles.textInput}
                 containerStyle={styles.listContainer}
                 itemTextStyle={styles.listItemStyle}
                 selectedTextStyle={styles.listItemStyle}
                 activeColor='#4d4d4d'
               />
-              {isCustomTime && (
+              {selectedPresetId === 'custom_time' && (
                 <TouchableOpacity
                   style={styles.startBtn}
-                  onPress={() => console.log('Hey! Hi!')}
+                  onPress={() => setIsCustomTime(true)}
                 >
                   <Text style={styles.startBtnText}>Enter</Text>
                 </TouchableOpacity>
@@ -227,7 +309,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 16,
   },
   timeInputsContainer: {
@@ -279,5 +361,24 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     color: colors.textLight,
     fontSize: 16,
+  },
+  customTimeModal: {
+    width: '85%',
+    height: '85%',
+    backgroundColor: colors.background,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  customTimeText: {
+    fontSize: 24,
+    fontFamily: fontFamily.regular,
+    color: colors.textLight,
+    includeFontPadding: false,
+  },
+  checkbox: {
+    borderRadius: 5,
+    borderColor: colors.primary,
   },
 });

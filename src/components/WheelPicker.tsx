@@ -1,5 +1,5 @@
 import { fontFamily } from '@/dimensions/fontFamily';
-import { useRef, useState } from 'react';
+import { RefObject, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,38 +11,36 @@ import {
 } from 'react-native';
 
 type WheelPickerProps = {
-  setSelectedMins: (mins: number) => void;
-  setSelectedSecs: (secs: number) => void;
+  setSignalTime: (value: number) => void;
   color: string;
 };
 
 // ITEM_HEIGHT is used so that every item inside the scrollView has an equal height,
 // and it enables the scrollView to snap to the nearest element using the ITEM_HEIGHT as an interval.
 const ITEM_HEIGHT = 40;
-// Creates a simple array holding the numbers 0-59
+// Creates a simple array holding the numbers 0 through 59
 const NUMBERS = Array.from({ length: 60 }, (_, i) => i);
 // Formats the numbers to text to be displayed (e.g., 1 -> 01)
 const formatNumber = (num: number) => num.toString().padStart(2, '0');
 
-export function WheelPicker({
-  setSelectedMins,
-  setSelectedSecs,
-  color,
-}: WheelPickerProps) {
-  const handleScrollEnd = (
-    unit: 'mins' | 'secs',
-    event: NativeSyntheticEvent<NativeScrollEvent>
-  ) => {
-    // Gets the scrollView's y offset to be used in calculating the currently selected item.
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-    const clampedIndex = Math.max(0, Math.min(index, NUMBERS.length - 1));
+export function WheelPicker({ setSignalTime, color }: WheelPickerProps) {
+  const minsOffsetYRef = useRef(0);
+  const secOffsetYRef = useRef(0);
 
-    if (unit === 'mins') {
-      setSelectedMins(clampedIndex);
-    } else {
-      setSelectedSecs(clampedIndex);
-    }
+  const handleScrollEnd = () => {
+    // Gets the minutes and seconds ScrollViews' y offsets to determine the selected times.
+    const minsIndex = Math.round(minsOffsetYRef.current / ITEM_HEIGHT);
+    const clampedMinsIndex = Math.max(
+      0,
+      Math.min(minsIndex, NUMBERS.length - 1)
+    );
+
+    const secIndex = Math.round(secOffsetYRef.current / ITEM_HEIGHT);
+    const clampedSecIndex = Math.max(0, Math.min(secIndex, NUMBERS.length - 1));
+
+    // Converts minutes and seconds into milliseconds, sums them up, and then sets the signal time.
+    setSignalTime(clampedMinsIndex * 60 * 1000 + clampedSecIndex * 1000);
+    console.log(`Mins: ${clampedMinsIndex}\nSec: ${clampedSecIndex}`);
   };
 
   return (
@@ -53,7 +51,10 @@ export function WheelPicker({
           showsVerticalScrollIndicator={false}
           snapToInterval={ITEM_HEIGHT}
           decelerationRate='fast'
-          onScroll={(event) => handleScrollEnd('mins', event)}
+          onScroll={(event) => {
+            minsOffsetYRef.current = event.nativeEvent.contentOffset.y;
+            handleScrollEnd();
+          }}
           scrollEventThrottle={500}
           contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
           style={
@@ -92,7 +93,11 @@ export function WheelPicker({
           showsVerticalScrollIndicator={false}
           snapToInterval={ITEM_HEIGHT}
           decelerationRate='fast'
-          onMomentumScrollEnd={(event) => handleScrollEnd('mins', event)}
+          onScroll={(event) => {
+            secOffsetYRef.current = event.nativeEvent.contentOffset.y;
+            handleScrollEnd();
+          }}
+          scrollEventThrottle={500}
           contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
           style={
             Platform.OS === 'web'

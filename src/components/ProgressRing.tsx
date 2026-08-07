@@ -16,7 +16,7 @@ export function ProgressRing({
   currentColor: current_color,
   elapsedTime,
 }: ProgressRingProps) {
-  const progressRatio = current_value / max_value;
+  const progressRatio = current_value / Math.max(max_value, 1);
   const radius = 135;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset =

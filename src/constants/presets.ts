@@ -46,9 +46,9 @@ export const SPEECH_PRESETS: SpeechPreset[] = [
   {
     id: 'custom_time',
     title: 'Custom',
-    greenMs: minToMs(5),
-    yellowMs: minToMs(6),
-    redMs: minToMs(7),
+    greenMs: minToMs(0.1),
+    yellowMs: minToMs(0.2),
+    redMs: minToMs(0.3),
   },
 ];
 

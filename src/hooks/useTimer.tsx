@@ -18,6 +18,15 @@ type UseTimerReturn = {
   maxProgressValue: number;
   currentProgressColor: string;
 
+  greenSignal: number;
+  setGreenSignal: (value: number) => void;
+
+  yellowSignal: number;
+  setYellowSignal: (value: number) => void;
+
+  redSignal: number;
+  setRedSignal: (value: number) => void;
+
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimer: () => void;
@@ -31,9 +40,9 @@ export default function useTimer({
   selectedPresetId,
   startPulseAnim,
 }: UseTimerOptions): UseTimerReturn {
-  const [greenSignalMs, setGreenSignalMs] = useState(5000);
-  const [yellowSignalMs, setYellowSignalMs] = useState(8000);
-  const [redSignalMs, setRedSignalMs] = useState(10000);
+  const [greenSignal, setGreenSignal] = useState(5000);
+  const [yellowSignal, setYellowSignal] = useState(8000);
+  const [redSignal, setRedSignal] = useState(10000);
   const gracePeriodMs = 30 * 1000; // 30s grace period
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -50,19 +59,24 @@ export default function useTimer({
 
   // Progress ring variables
   const [progressValue, setProgressValue] = useState(0);
-  const [maxProgressValue, setMaxProgressValue] = useState(redSignalMs);
+  const [maxProgressValue, setMaxProgressValue] = useState(0);
   const [currentProgressColor, setCurrentProgressColor] = useState(
     colors.primary
   );
 
   // Exposed setters
   const setPreset = (green: number, yellow: number, red: number) => {
-    setGreenSignalMs(green);
-    setYellowSignalMs(yellow);
-    setRedSignalMs(red);
+    setGreenSignal(green);
+    setYellowSignal(yellow);
+    setRedSignal(red);
+    setMaxProgressValue(red);
   };
 
   const startTimer = () => {
+    console.log(
+      `Green Signal: ${greenSignal}\nYellow Signal: ${yellowSignal}\nRed Signal: ${redSignal}`
+    );
+    console.log(`maxProgress: ${maxProgressValue}`);
     hasStartedRef.current = true;
     setRunning(true);
     startTimeRef.current = Date.now() - elapsedTime;
@@ -75,14 +89,11 @@ export default function useTimer({
 
       // This if statement will run only once. This avoids unnecessary calls to the 'onMaxTime' function.
       // The same if statement is also ran in the 'resumeTimer' function.
-      if (currentMs >= redSignalMs && !redSignalReachedRef.current) {
+      if (currentMs >= redSignal && !redSignalReachedRef.current) {
         onRedSignal();
-      } else if (
-        currentMs >= yellowSignalMs &&
-        !yellowSignalReachedRef.current
-      ) {
+      } else if (currentMs >= yellowSignal && !yellowSignalReachedRef.current) {
         onYellowSignal();
-      } else if (currentMs >= greenSignalMs && !greenSignalReachedRef.current) {
+      } else if (currentMs >= greenSignal && !greenSignalReachedRef.current) {
         onGreenSignal();
       }
     }, 100);
@@ -105,7 +116,7 @@ export default function useTimer({
 
     // Resets the progress ring's variables
     setProgressValue(0);
-    setMaxProgressValue(redSignalMs);
+    setMaxProgressValue(redSignal);
     setCurrentProgressColor(colors.primary);
   };
 
@@ -162,7 +173,7 @@ export default function useTimer({
         const currentMs = Date.now() - startTimeRef.current;
 
         setElapsedTime(currentMs);
-        setProgressValue(currentMs - redSignalMs);
+        setProgressValue(currentMs - redSignal);
       }, 100);
     }
   };
@@ -175,6 +186,21 @@ export default function useTimer({
     progressValue,
     maxProgressValue,
     currentProgressColor,
+
+    greenSignal,
+    setGreenSignal(value) {
+      setGreenSignal(value);
+    },
+
+    yellowSignal,
+    setYellowSignal(value) {
+      setYellowSignal(value);
+    },
+
+    redSignal,
+    setRedSignal(value) {
+      setRedSignal(value);
+    },
 
     startTimer,
     pauseTimer,
